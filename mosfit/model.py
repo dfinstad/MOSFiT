@@ -37,6 +37,7 @@ class Model(object):
 
     def __init__(self,
                  parameter_path='parameters.json',
+                 parameter_space=False,
                  model='',
                  data={},
                  wrap_length=100,
@@ -51,6 +52,7 @@ class Model(object):
 
         self._model_name = model
         self._parameter_path = parameter_path
+        self._parameter_space = parameter_space
         self._output_path = output_path
         self._pool = SerialPool() if pool is None else pool
         self._is_master = pool.is_master() if pool else False
@@ -963,8 +965,11 @@ class Model(object):
             inputs.update(OrderedDict([('root', root)]))
             cur_depth = cur_task['depth']
             if task in self._free_parameters:
-                inputs.update(OrderedDict([('fraction', x[pos])]))
-                inputs.setdefault('fractions', []).append(x[pos])
+                if self._parameter_space:
+                    inputs.update(OrderedDict([('value', x[pos])]))
+                else:
+                    inputs.update(OrderedDict([('fraction', x[pos])]))
+                    inputs.setdefault('fractions', []).append(x[pos])
                 pos = pos + 1
             try:
                 new_outs = self._modules[task].process(**inputs)

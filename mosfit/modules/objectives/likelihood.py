@@ -30,8 +30,9 @@ class Likelihood(Module):
         ret = {'value': LIKELIHOOD_FLOOR}
 
         self._fractions = kwargs.get('fractions', [])
-        if not self._fractions:
-            return ret
+        # FIXME this is a workaround for parameter space sampling
+        #if not self._fractions:
+        #    return ret
 
         self._model_observations = kwargs['model_observations']
         self._score_modifier = kwargs.get(self.key('score_modifier'), 0.0)
@@ -40,8 +41,9 @@ class Likelihood(Module):
 
         value = ret['value']
 
-        if min(self._fractions) < 0.0 or max(self._fractions) > 1.0:
-            return ret
+        # FIXME workaround
+        #if min(self._fractions) < 0.0 or max(self._fractions) > 1.0:
+        #    return ret
         for oi, obs in enumerate(self._model_observations):
             if not self._upper_limits[oi] and (isnan(obs) or
                                                not np.isfinite(obs)):
