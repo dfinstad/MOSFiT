@@ -452,7 +452,7 @@ class Model(object):
         # Run through once to set all inits.
         for root in ['output', 'objective']:
             outputs = self.run_stack(
-                [0.0 for x in range(self._num_free_parameters)],
+                [1.0 for x in range(self._num_free_parameters)],
                 root=root)
 
         # Create any data-dependent free parameters.
@@ -472,7 +472,7 @@ class Model(object):
         # Run through inits once more.
         for root in ['output', 'objective']:
             outputs = self.run_stack(
-                [0.0 for x in range(self._num_free_parameters)],
+                [1.0 for x in range(self._num_free_parameters)],
                 root=root)
 
         # Collect observed band info
