@@ -109,6 +109,10 @@ class Parameter(Module):
                 return {}
 
             value = self._value
+        elif 'value' in kwargs:
+            value = kwargs['value']
+            if self._log:
+                value = np.power(10.0, value)
         else:
             value = self.value(kwargs['fraction'])
 
