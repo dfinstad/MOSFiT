@@ -37,92 +37,63 @@ class BNSEjectaChiralEFT(Energetic):
         {SOURCE.BIBCODE: '2018PhRvL.121i1102D'}
     ]
 
-    def process(self, **kwargs):
+    def process(self, mass1=None, mass2=None, disk_frac=None, kappa_red=None,
+                cos_theta_open=None, kappa_blue=None, alpha=None, eos=None,
+                errMdyn=1.0, errMdisk=1.0, **kwargs):
         """Process module."""
         ckm = C_CGS / KM_CGS
-        self._mchirp = kwargs[self.key('Mchirp')]
-        # q here is m1/m2 >= 1
-        self._q = kwargs[self.key('q')]
-        # Mass of heavier NS
-        self._m1 = self._mchirp * self._q**0.4 * (self._q+1)**0.2
-        # Mass of lighter NS
-        self._m2 = self._mchirp * (self._q**(-0.6))*(self._q+1)**0.2
-        self._m_total = self._m1 + self._m2
-        # How much of disk is ejected
-        self._disk_frac = kwargs[self.key('disk_frac')]
-        # Max mass for non-rotating NS
-        self._m_tov = kwargs[self.key('Mtov')]
-        # Symmetric tidal polarizability
-        #self._LambdaSym = kwargs[self.key('LambdaSym')]
-        self._Lambda1 = kwargs[self.key('Lambda1')]
-        self._Lambda2 = kwargs[self.key('Lambda2')]
-        # Fraction of blue ejecta from dynamical shocks (Coughlin+ 2019)
-        # Here we are assuming remainder is a NS wind
-        # So only applicable if merger product avoids prompt collapse
-        self._alpha = kwargs[self.key('alpha')]
-        # Opening angle
-        self._cos_theta_open = kwargs[self.key('cos_theta_open')]
-        self._kappa_red = kwargs[self.key('kappa_red')]
-        self._kappa_blue = kwargs[self.key('kappa_blue')]
+
+        #self._mchirp = kwargs[self.key('Mchirp')]
+        ## q here is m1/m2 >= 1
+        #self._q = kwargs[self.key('q')]
+        ## Mass of heavier NS
+        #self._m1 = self._mchirp * self._q**0.4 * (self._q+1)**0.2
+        ## Mass of lighter NS
+        #self._m2 = self._mchirp * (self._q**(-0.6))*(self._q+1)**0.2
+        #self._m_total = self._m1 + self._m2
+        ## How much of disk is ejected
+        #self._disk_frac = kwargs[self.key('disk_frac')]
+        ## Max mass for non-rotating NS
+        #self._m_tov = kwargs[self.key('Mtov')]
+        ## Symmetric tidal polarizability
+        ##self._LambdaSym = kwargs[self.key('LambdaSym')]
+        #self._Lambda1 = kwargs[self.key('Lambda1')]
+        #self._Lambda2 = kwargs[self.key('Lambda2')]
+        ## Fraction of blue ejecta from dynamical shocks (Coughlin+ 2019)
+        ## Here we are assuming remainder is a NS wind
+        ## So only applicable if merger product avoids prompt collapse
+        #self._alpha = kwargs[self.key('alpha')]
+        ## Opening angle
+        #self._cos_theta_open = kwargs[self.key('cos_theta_open')]
+        #self._kappa_red = kwargs[self.key('kappa_red')]
+        #self._kappa_blue = kwargs[self.key('kappa_blue')]
+
+        self._m1 = mass1
+        self._m2 = mass2
+        self._m_total = mass1 + mass2
+        self._q = mass1 / mass2
+        self._mchirp = ((mass1 * mass2) ** 3 / (mass1 + mass2)) ** (1. / 5)
+        self._disk_frac = disk_frac
+        self._alpha = alpha
+        self._cos_theta_open = cos_theta_open
+        self._kappa_red = kappa_red
+        self._kappa_blue = kappa_blue
+        self._eos = eos
+
+        eosdir = "/home/daniel.finstad/projects/gw170817-eft-eos/eos_data/2nsat"
+        eosfile = "{}/{}.dat".format(eosdir, int(self._eos))
+        rdat, mdat, ldat = np.loadtxt(eosfile, unpack=True)
+        self._Lambda1 = np.interp(self._m1, mdat, ldat)
+        self._Lambda2 = np.interp(self._m2, mdat, ldat)
+        self._R1 = np.interp(self._m1, mdat, rdat)
+        self._R2 = np.interp(self._m2, mdat, rdat)
+        self._m_tov = np.max(mdat)
 
         theta_open = np.arccos(self._cos_theta_open)
 
         # Additional systematic error (useful when fitting)
-        self._errMdyn = kwargs[self.key('errMdyn')]
-        self._errMdisk = kwargs[self.key('errMdisk')]
-
-        # # Symmetric mass ratio
-        # eta = self._m1 * self._m2 / (self._m1 + self._m2)**2
-        #
-        # # Matrix elements for L1 and L2
-        # A1 = 8/13*(1+7*eta-31*eta**2 + np.sqrt(1-4*eta)*(1+9*eta-11*eta**2))
-        # A2 = 8/13*(1+7*eta-31*eta**2 - np.sqrt(1-4*eta)*(1+9*eta-11*eta**2))
-        # # # Using approximation L \propto m^-6:
-        # # A3 = 1
-        # # A4 = -self._q**6
-        # # Using definition of deltaLambdaTilde:
-        # A3 = 1/2*(np.sqrt(1-4*eta)*(1-(13272*eta+8944*eta**2)/1319) +
-        #         (1-(15910*eta+38850*eta**2+3380*eta**3)/1319))
-        # A4 = 1/2*(np.sqrt(1-4*eta)*(1-(13272*eta+8944*eta**2)/1319) -
-        #         (1-(15910*eta+38850*eta**2+3380*eta**3)/1319))
-        #
-        # A = np.array([[A1,A2],[A3,A4]])
-        #
-        # deltaLambda = 0
-        # deltaLambda = self._dLambda
-        # B = np.array([self._Lambda,deltaLambda])
-        #
-        # L1, L2 = np.linalg.solve(A,B)
-
-
-        ## Yagi and Yunes 2016 QUR to get L1 and L2 from Lsym
-        #a = 0.07550
-        #b = np.array([[-2.235, 0.8474],[10.45, -3.251],[-15.70, 13.61]])
-        #c = np.array([[-2.048, 0.5976],[7.941, 0.5658],[-7.360, -1.320]])
-        #n_ave = 0.743
-
-        #Fq = (1-(self._m2/self._m1)**(10./(3-n_ave)))/(1+(self._m2/self._m1)**(10./(3-n_ave)))
-
-        #nume = a
-        #denom = a
-
-        #Ls = self._LambdaSym
-
-        #for i in np.arange(3):
-        #    for j in np.arange(2):
-        #        nume += b[i,j]*(self._m2/self._m1)**(j+1)*Ls**(-(i+1)/5)
-
-        #for i in np.arange(3):
-        #    for j in np.arange(2):
-        #        denom += c[i,j]*(self._m2/self._m1)**(j+1)*Ls**(-(i+1)/5)
-
-        #La = Ls * Fq * nume / denom
-
-        #L1 = Ls - La
-        #L2 = Ls + La
-
-        #L1 = self._LambdaSym * (self._m2 / self._m1) ** 3.
-        #L2 = self._LambdaSym * (self._m1 / self._m2) ** 3.
+        self._errMdyn = errMdyn
+        self._errMdisk = errMdisk
 
         L1 = self._Lambda1
         L2 = self._Lambda2
@@ -138,14 +109,12 @@ class BNSEjectaChiralEFT(Energetic):
         C1 = 0.360 - 0.0355*np.log(L1) + 0.000705*np.log(L1)**2
         C2 = 0.360 - 0.0355*np.log(L2) + 0.000705*np.log(L2)**2
 
-        self._R1 = (G_CGS * self._m1 * M_SUN_CGS / (C1 * C_CGS**2)) / 1e5
-        self._R2 = (G_CGS * self._m2 * M_SUN_CGS / (C2 * C_CGS**2)) / 1e5
-
+        #self._R1 = (G_CGS * self._m1 * M_SUN_CGS / (C1 * C_CGS**2)) / 1e5
+        #self._R2 = (G_CGS * self._m2 * M_SUN_CGS / (C2 * C_CGS**2)) / 1e5
 
         # Baryonic masses, Gao 2019
         Mb1 = self._m1 + 0.08*self._m1**2
         Mb2 = self._m2 + 0.08*self._m2**2
-
 
         # Dynamical ejecta:
 
@@ -177,14 +146,12 @@ class BNSEjectaChiralEFT(Energetic):
         mejecta_red = Mejdyn * f_red
         mejecta_blue = Mejdyn * (1-f_red)
 
-
         # Velocity of dynamical ejecta
         a_2 = -0.219479
         b_2 = 0.444836
         c_2 = -2.67385
 
         vdynp = a_2*((self._m1/self._m2)*(1+c_2*C1) + (self._m2/self._m1)*(1+c_2*C2)) + b_2
-
 
         a_3 = -0.315585
         b_3 = 0.63808
@@ -211,14 +178,11 @@ class BNSEjectaChiralEFT(Energetic):
         vejecta_red *= ckm
         vejecta_blue *= ckm
 
-
-
         # Bauswein 2013, cut-off for prompt collapse to BH
         Mthr = (2.38-3.606*self._m_tov/self._radius_ns)*self._m_tov
 
         if self._m_total < Mthr:
             mejecta_blue /= self._alpha
-
 
         # Now compute disk ejecta following Coughlin+ 2019
 
@@ -301,6 +265,8 @@ class BNSEjectaChiralEFT(Energetic):
                 self.key('R1'): self._R1,
                 self.key('R2'): self._R2,
                 self.key('radius_ns'): self._radius_ns,
+                self.key('eos'): self._eos,
+                self.key('Mtov'): self._m_tov,
                 self.key('Lambda'): self._Lambda
                 }
 

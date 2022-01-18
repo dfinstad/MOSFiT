@@ -8,13 +8,13 @@
         "min_value":-1.0,
         "max_value":0.0
      },
-    "Mchirp":{
-        "min_value":0.7,
+    "mass1":{
+        "min_value":1.0,
         "max_value":2.0
     },
-    "q":{
-        "min_value":0.4,
-        "max_value":1.0
+    "mass2":{
+        "min_value":1.0,
+        "max_value":2.0
     },
     "alpha":{
        "min_value":0.1,
@@ -38,17 +38,9 @@
     "s":{
         "value":1.0
     },
-    "Mtov":{
-        "min_value":2.0,
-        "max_value":2.5
-    },
-    "Lambda1":{
-        "min_value":10,
-        "max_value":2000
-    },
-    "Lambda2":{
-        "min_value":10,
-        "max_value":2000
+    "eos":{
+        "min_value":1.0,
+        "max_value":2000.99
     },
    "kappa_blue":{
         "value":0.5

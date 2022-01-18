@@ -65,9 +65,9 @@
         "class":"parameter",
         "latex":"\\kappa_\\gamma\\,({\\rm cm}^{2}\\,{\\rm g}^{-1})"
     },
-    "Mchirp":{
+    "mass1":{
         "kind":"parameter",
-        "value":1.188,
+        "value":1.4,
         "class":"parameter",
         "latex":"M_{\\rm chirp}\\,(M_\\odot)",
         "derived_keys":[
@@ -88,9 +88,9 @@
             "kappa_mean"
         ]
     },
-    "q":{
+    "mass2":{
         "kind":"parameter",
-        "value":1.0,
+        "value":1.4,
         "class":"parameter",
         "latex":"q=M_{2}/M_{1}"
     },
@@ -124,23 +124,11 @@
         "class":"parameter",
         "latex":"\\alpha"
     },
-    "Mtov":{
+    "eos":{
         "kind":"parameter",
-        "value":2.1,
+        "value":830,
         "class":"parameter",
-        "latex":"M_{\\rm TOV}\\,(M_\\odot)"
-    },
-    "Lambda1":{
-        "kind":"parameter",
-        "value":200,
-        "class":"parameter",
-        "latex":"\\Lambda_{1}"
-    },
-    "Lambda2":{
-        "kind":"parameter",
-        "value":200,
-        "class":"parameter",
-        "latex":"\\Lambda_{2}"
+        "latex":"EOS"
     },
     "cos_theta_cocoon":{
         "kind":"parameter",
@@ -181,13 +169,11 @@
     "bns_ejecta_chiral_eft":{
         "kind":"energetic",
         "inputs":[
-            "Mchirp",
-            "q",
+            "mass1",
+            "mass2",
             "alpha",
             "disk_frac",
-            "Mtov",
-            "Lambda1",
-            "Lambda2",
+            "eos",
             "kappa_red",
             "kappa_blue",
             "errMdyn",
@@ -483,7 +469,7 @@
     "bns_constraints":{
         "kind":"constraint",
         "inputs":[
-            "Mtov",
+            "eos",
             "bns_ejecta_chiral_eft"
         ]
     },

@@ -33,7 +33,13 @@ class BNSConstraints(Constraint):
         self._m1 = kwargs[self.key('M1')]
         # Mass of lighter NS
         self._m2 = kwargs[self.key('M2')]
-        self._m_tov = kwargs[self.key('Mtov')]
+        if 'eos' in kwargs:
+            eosfile = "/home/daniel.finstad/projects/gw170817-eft-eos/eos_data/"
+            eosfile += "2nsat/{}.dat".format(int(kwargs[self.key('eos')]))
+            _, mdat, _ = np.loadtxt(eosfile, unpack=True)
+            self._m_tov = np.max(mdat)
+        else:
+            self._m_tov = kwargs[self.key('Mtov')]
         self._r1 = kwargs[self.key('R1')]
         self._r2 = kwargs[self.key('R2')]
 
