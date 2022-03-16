@@ -39,7 +39,12 @@ class LuminosityDistance(Parameter):
                     value = (cosmo.luminosity_distance(
                         self._redshift) / un.Mpc).value
             else:
-                value = self.value(kwargs['fraction'])
+                if 'value' in kwargs:
+                    value = kwargs['value']
+                    if self._log:
+                        value = np.power(10, value)
+                else:
+                    value = self.value(kwargs['fraction'])
         else:
             value = self._value
 
