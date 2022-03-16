@@ -50,6 +50,24 @@
         "min_value":10,
         "max_value":2000
     },
+    "radius1":{
+        "kind":"parameter",
+        "value":11.0,
+        "class":"parameter",
+        "latex":""
+    },
+    "radius2":{
+        "kind":"parameter",
+        "value":11.0,
+        "class":"parameter",
+        "latex":""
+    },
+    "radius16":{
+        "kind":"parameter",
+        "value":11.0,
+        "class":"parameter",
+        "latex":""
+    },
    "kappa_blue":{
         "value":0.5
     },

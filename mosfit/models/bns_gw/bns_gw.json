@@ -32,6 +32,12 @@
         "latex":"n_{\\rm H,host}",
         "derived_keys":"avhost"
     },
+    "lumdist":{
+        "kind":"parameter",
+        "value":40.7,
+        "class":"parameter",
+        "latex":"d_L"
+    },
     "texplosion":{
         "kind":"parameter",
         "value":-0.47406,
@@ -142,6 +148,24 @@
         "class":"parameter",
         "latex":"\\Lambda_{2}"
     },
+    "radius1":{
+        "kind":"parameter",
+        "value":11.0,
+        "class":"parameter",
+        "latex":""
+    },
+    "radius2":{
+        "kind":"parameter",
+        "value":11.0,
+        "class":"parameter",
+        "latex":""
+    },
+    "radius16":{
+        "kind":"parameter",
+        "value":11.0,
+        "class":"parameter",
+        "latex":""
+    },
     "cos_theta_cocoon":{
         "kind":"parameter",
         "value":1.0,
@@ -188,6 +212,9 @@
             "Mtov",
             "Lambda1",
             "Lambda2",
+            "radius1",
+            "radius2",
+            "radius16",
             "kappa_red",
             "kappa_blue",
             "errMdyn",
