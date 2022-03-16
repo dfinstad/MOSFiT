@@ -40,7 +40,7 @@ class BNSEjectaGW(Energetic):
     def process(self, mass1=None, mass2=None, disk_frac=None, Mtov=None,
                 Lambda1=None, Lambda2=None, alpha=None, cos_theta_open=None,
                 kappa_red=None, kappa_blue=None, errMdyn=None, errMdisk=None,
-                **kwargs):
+                radius1=None, radius2=None, radius16=None, **kwargs):
         """Process module."""
         ckm = C_CGS / KM_CGS
 
@@ -69,19 +69,24 @@ class BNSEjectaGW(Energetic):
                 (self._m2 + 12*self._m1) * self._m2**4 * L2) / self._m_total**5
 
         # Approx radius of NS from De+ 2018
-        self._radius_ns = 11.2 * self._mchirp * (self._Lambda/800)**(1./6.)
+        #self._radius_ns = 11.2 * self._mchirp * (self._Lambda/800)**(1./6.)
+        self._radius_ns = radius16  # should be R_1.6 in km!
+        self._R1 = radius1  # km
+        self._R2 = radius2  # km
 
         # Compactness of each component (Maselli et al. 2013; Yagi & Yunes 2017)
         # C = (GM/Rc^2)
-        C1 = 0.360 - 0.0355*np.log(L1) + 0.000705*np.log(L1)**2
-        C2 = 0.360 - 0.0355*np.log(L2) + 0.000705*np.log(L2)**2
+        #C1 = 0.360 - 0.0355*np.log(L1) + 0.000705*np.log(L1)**2
+        #C2 = 0.360 - 0.0355*np.log(L2) + 0.000705*np.log(L2)**2
+        C1 = G_CGS * mass1 * M_SUN_CGS / (self._R1 * 1e5 * C_CGS ** 2.)
+        C2 = G_CGS * mass2 * M_SUN_CGS / (self._R2 * 1e5 * C_CGS ** 2.)
 
-        self._R1 = (G_CGS * self._m1 * M_SUN_CGS / (C1 * C_CGS**2)) / 1e5
-        self._R2 = (G_CGS * self._m2 * M_SUN_CGS / (C2 * C_CGS**2)) / 1e5
+        #self._R1 = (G_CGS * self._m1 * M_SUN_CGS / (C1 * C_CGS**2)) / 1e5
+        #self._R2 = (G_CGS * self._m2 * M_SUN_CGS / (C2 * C_CGS**2)) / 1e5
 
         # Baryonic masses, Gao 2019
-        Mb1 = self._m1 + 0.08*self._m1**2
-        Mb2 = self._m2 + 0.08*self._m2**2
+        Mb1 = self._m1 + 0.08 * self._m1 ** 2
+        Mb2 = self._m2 + 0.08 * self._m2 ** 2
 
         # Dynamical ejecta:
 
@@ -113,7 +118,7 @@ class BNSEjectaGW(Energetic):
         mejecta_red = Mejdyn * f_red
         mejecta_blue = Mejdyn * (1-f_red)
 
-        # Velocity of dynamical ejecta
+        # Velocity of dynamical ejecta from Dietrich and Ujevic 2017
         a_2 = -0.219479
         b_2 = 0.444836
         c_2 = -2.67385
@@ -146,7 +151,9 @@ class BNSEjectaGW(Energetic):
         vejecta_blue *= ckm
 
         # Bauswein 2013, cut-off for prompt collapse to BH
-        Mthr = (2.38-3.606*self._m_tov/self._radius_ns)*self._m_tov
+        #Mthr = (2.38-3.606*self._m_tov/self._radius_ns)*self._m_tov
+        C16 = G_CGS * self._m_tov * M_SUN_CGS / (self._radius_ns * 1e5 * C_CGS ** 2.)
+        Mthr = (2.38 - 3.606 * C16) * self._m_tov
 
         if self._m_total < Mthr:
             mejecta_blue /= self._alpha
@@ -169,10 +176,9 @@ class BNSEjectaGW(Energetic):
         mejecta_purple = Mejdisk
 
         # Fit for disk velocity using Metzger and Fernandez
-        vdisk_max = 0.15
+        vdisk_max = 0.10
         vdisk_min = 0.03
-        #vfit = np.polyfit([self._m_tov,Mthr],[vdisk_max,vdisk_min],deg=1)
-        vfit = self.linfit(self._m_tov, Mthr, vdisk_max, vdisk_min)
+        vfit = np.polyfit([self._m_tov,Mthr],[vdisk_max,vdisk_min],deg=1)
 
         # Get average opacity of 'purple' (disk) component
         # Mass-averaged Ye as a function of remnant lifetime from Lippuner 2017
@@ -185,13 +191,11 @@ class BNSEjectaGW(Energetic):
             # long-lived (>>100 ms) NS remnant Ye = 0.34-0.38,
             # smooth interpolation
             Yfit = np.polyfit([self._m_tov,1.2*self._m_tov],[0.38,0.34],deg=1)
-            #Yfit = self.linfit(self._m_tov,1.2*self._m_tov,0.38,0.34)
             Ye = Yfit[0]*self._m_total + Yfit[1]
             vdisk = vfit[0]*self._m_total + vfit[1]
         elif self._m_total < Mthr:
             # short-lived (hypermassive) NS, Ye = 0.25-0.34, smooth interpolation
             Yfit = np.polyfit([1.2*self._m_tov,Mthr],[0.34,0.25],deg=1)
-            #Yfit = self.linfit(1.2*self._m_tov,Mthr,0.34,0.25)
             Ye = Yfit[0]*self._m_total + Yfit[1]
             vdisk = vfit[0]*self._m_total + vfit[1]
         else:
@@ -234,8 +238,3 @@ class BNSEjectaGW(Energetic):
                 self.key('Lambda'): self._Lambda
                 }
 
-    @staticmethod
-    def linfit(x1, x2, y1, y2):
-        m = float(y2 - y1) / float(x2 - x1)
-        b = y1 - m * x1
-        return m, b
