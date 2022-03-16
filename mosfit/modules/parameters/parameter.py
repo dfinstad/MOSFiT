@@ -76,7 +76,8 @@ class Parameter(Module):
                         (self._max_value - self._min_value) + self._min_value,
                         self._min_value, self._max_value)
         if self._log:
-            value = np.exp(value)
+            #value = np.exp(value)
+            value = np.power(10.0, value)
         return value
 
     def fraction(self, value, clip=True):
