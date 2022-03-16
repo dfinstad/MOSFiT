@@ -377,6 +377,7 @@ class Model(object):
                 if (task == param or
                         self._call_stack[task].get(
                             'class', '') == param):
+                    print("appending {} to fixed parameters".format(task))
                     fixed_parameters.append(task)
                     if fi < len(user_fixed_parameters) - 1 and is_number(
                             user_fixed_parameters[fi + 1]):
@@ -452,7 +453,7 @@ class Model(object):
         # Run through once to set all inits.
         for root in ['output', 'objective']:
             outputs = self.run_stack(
-                [1.0 for x in range(self._num_free_parameters)],
+                [0.5 for x in range(self._num_free_parameters)],
                 root=root)
 
         # Create any data-dependent free parameters.
@@ -472,7 +473,7 @@ class Model(object):
         # Run through inits once more.
         for root in ['output', 'objective']:
             outputs = self.run_stack(
-                [1.0 for x in range(self._num_free_parameters)],
+                [0.5 for x in range(self._num_free_parameters)],
                 root=root)
 
         # Collect observed band info
