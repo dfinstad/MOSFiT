@@ -92,8 +92,8 @@ class BNSConstraints(Constraint):
             self._score_modifier -= 1e10
             #logging.warn("v_ejecta_blue is %s < 0! Modifying score by %s",
             #             self._vejecta_blue, self._score_modifier)
-        elif self._vejecta_blue < 0.2:
-            self._score_modifier -= (1e3 * (0.2 - self._vejecta_blue)) ** 2.
+        elif self._vejecta_blue < 0.1:
+            self._score_modifier -= (1e3 * (0.1 - self._vejecta_blue)) ** 2.
             #logging.warn("v_ejecta_blue is %s < 0.2! Modifying score by %s",
             #             self._vejecta_blue, self._score_modifier)
 
