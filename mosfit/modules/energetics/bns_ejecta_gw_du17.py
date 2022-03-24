@@ -174,6 +174,8 @@ class BNSEjectaGW(Energetic):
 
         mejecta_purple = Mejdisk
 
+        mejecta_tot = mejecta_blue + mejecta_red + mejecta_purple
+
         # Fit for disk velocity using Metzger and Fernandez
         vdisk_max = 0.10
         vdisk_min = 0.03
@@ -224,7 +226,7 @@ class BNSEjectaGW(Energetic):
                 self.key('mejecta_red'): mejecta_red,
                 self.key('mejecta_purple'): mejecta_purple,
                 self.key('mejecta_dyn'): Mejdyn,
-                self.key('mejecta_tot'): Mejdyn+mejecta_purple,
+                self.key('mejecta_tot'): mejecta_tot,
                 self.key('vejecta_blue'): vejecta_blue,
                 self.key('vejecta_red'): vejecta_red,
                 self.key('vejecta_purple'): vejecta_purple,
