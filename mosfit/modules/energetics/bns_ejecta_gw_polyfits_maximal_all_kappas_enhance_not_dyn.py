@@ -77,8 +77,8 @@ class BNSEjectaGW(Energetic):
 
         # Compactness of each component (Maselli et al. 2013; Yagi & Yunes 2017)
         # C = (GM/Rc^2)
-        C1 = G_CGS * mass1 * M_SUN_CGS / (self._R1 * 1e5 * C_CGS ** 2.)
-        C2 = G_CGS * mass2 * M_SUN_CGS / (self._R2 * 1e5 * C_CGS ** 2.)
+        #C1 = G_CGS * mass1 * M_SUN_CGS / (self._R1 * 1e5 * C_CGS ** 2.)
+        #C2 = G_CGS * mass2 * M_SUN_CGS / (self._R2 * 1e5 * C_CGS ** 2.)
 
         # set up 2-param polynomial from Nedora et al. 2022
         poly2par = lambda b: b[0] + b[1] * self._q + b[2] * self._Lambda \
@@ -117,7 +117,14 @@ class BNSEjectaGW(Energetic):
 
         # distribute velocity according to mass, neglecting any magnetic wind
         # enhancement as this likely wasn't present in simulations
-        v_ejecta_blue = (vejecta * Mejdyn - mejecta_red * v_ejecta_red) / mejecta_blue
+        mvdyn = Mejdyn * vejecta
+        mvred = mejecta_red * v_ejecta_red
+        if mejecta_blue <= 0.0 or mvred > mvdyn:
+            mejecta_blue = 0.0
+            v_ejecta_blue = 0.0
+            v_ejecta_red = vejecta
+        else:
+            v_ejecta_blue = (mvdyn - mvred) / mejecta_blue
         # convert to km/s
         vejecta_red = v_ejecta_red * ckm
         vejecta_blue = v_ejecta_blue * ckm
