@@ -34,13 +34,14 @@ class CocoonPhotosphere(Photosphere):
         self._m_ejecta = kwargs[self.key('mejecta')]
         self._kappa = kwargs[self.key('kappa')]
         self._shocked_fraction = kwargs[self.key('shock_frac')]
+        self._s = kwargs[self.key('s')]
 
         m_shocked = self._m_ejecta * self._shocked_fraction
 
         self._tau_diff = np.sqrt(self.DIFF_CONST * self._kappa *
                                  m_shocked / self._v_ejecta) / DAY_CGS
 
-        t_thin = (C_KMS / self._v_ejecta)**0.5 * self._tau_diff
+        t_thin = (self.C_KMS / self._v_ejecta)**0.5 * self._tau_diff
 
 
         rphot = []
@@ -49,9 +50,9 @@ class CocoonPhotosphere(Photosphere):
 
             ts = self._times[li] - self._rest_t_explosion
 
-            vphot = self._v_ejecta * (ts/t_thin)**(-2./(s+3))
+            vphot = self._v_ejecta * (ts/t_thin)**(-2./(self._s+3))
             
-            radius = RAD_CONST * vphot * max(ts, 0.0)
+            radius = self.RAD_CONST * vphot * max(ts, 0.0)
             
             if lum == 0.0:
                 temperature = 0.0
